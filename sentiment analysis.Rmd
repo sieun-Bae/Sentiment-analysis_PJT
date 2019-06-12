@@ -1,0 +1,40 @@
+---
+title: "Untitled"
+author: "sieun Bae"
+date: '2019 6 10 '
+output: html_document
+---
+
+```{r}
+#install.packages('tidytext')
+library(tidytext)
+library(tidyverse)
+library(tidyr)
+library(magrittr)
+library(dplyr)
+```
+
+```{r}
+politics <- read.csv("politics.csv", stringsAsFactors = FALSE)
+politics <- politics[1:4] #select comlumns including index, title, date, time 
+politics <- politics[grep("Trump", politics$Title),]
+
+politics_sentiment <- politics %>%
+  unnest_tokens(word, "Title", token="words", to_lower=TRUE) %>%
+  inner_join(get_sentiments("afinn"))
+
+politics %>%
+  left_join(politics_sentiment %>%
+              group_by(X) %>%
+              summarise(score = sum(score))) %>%
+  replace_na(list(score=0)) -> politics
+
+summary(politics$score)
+
+#View(politics %>% filter(score <= -7))
+#View(politics %>% filter(score >= 5))
+
+
+
+```
+
